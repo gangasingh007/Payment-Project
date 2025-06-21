@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { userCheck, userUpdateCheck } from '../Types/user.types.js';
+import { userCheck, userSigninCheck, userUpdateCheck } from '../Types/user.types.js';
 import { authMiddleware } from '../Middlewares/user.middleware.js';
 
 const router = express.Router();
@@ -32,14 +32,14 @@ router.post("/signup", userCheck,async (req, res) => {
         const token = jwt.sign(
             { id: newUser._id },
             process.env.JWT_SECRET);
-        res.status(201).json(token,{ message: "User created successfully" });
+        res.status(201).json(token, {message: "User created successfully"} );
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
 
-router.post("/signin",userCheck, async (req, res) => {
+router.post("/signin", userSigninCheck,async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required" });

@@ -3,7 +3,7 @@ import zod from 'zod';
 const userCheckSchema = zod.object({
     username: zod.string(),
     password: zod.string(),
-    firstName: zod.string(),
+    firstName: zod.string() ,
     lastName: zod.string(),
 });
 
@@ -11,7 +11,7 @@ export const userCheck = (req,res,next) => {
     const paylod = req.body;
     const result = userCheckSchema.safeParse(paylod);
     if (!result.success) {
-        return res.status(400).json({ message: "Invalid input", errors: result.error.errors });
+        return res.status(400).json({ message: "Invalid input" });
     }
     next();
 }
@@ -31,3 +31,17 @@ export const userUpdateCheck = (req, res, next) => {
     }
     next();
 }
+
+const userSigninSchema = zod.object({
+    username: zod.string(),
+    password: zod.string(),
+});
+
+export const userSigninCheck = (req, res, next) => {
+    const payload = req.body;
+    const result = userSigninSchema.safeParse(payload);
+    if (!result.success) {
+        return res.status(400).json({ message: "Invalid input", errors: result.error.errors });
+    }
+    next();
+} 
