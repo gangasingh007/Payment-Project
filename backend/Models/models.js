@@ -22,3 +22,17 @@ const userschema = new mongoose.Schema({
     }, { timestamps: true });
 
 export const User = mongoose.model('User', userschema);
+
+const accountScheme = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    balance: {
+        type: Number,
+        default: 0,
+    }
+}, { timestamps: true });
+
+export const Account = mongoose.model('Account', accountScheme);

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { userCheck, userSigninCheck, userUpdateCheck } from '../Types/user.types.js';
 import { authMiddleware } from '../Middlewares/user.middleware.js';
+import { Account, User } from '../Models/models.js';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.post("/signup", userCheck,async (req, res) => {
         return res.status(400).json({ message: "Password must be at least 6 characters long" });
     }
     try {
-        const User = await import('../Models/user.model.js').then(module => module.User);
+        const User = await import('../Models/models.js').then(module => module.User);
         const existingUser = await User.findOne({ usernname: username });
         if (existingUser) {
             return res.status(400).json({ message: "Username already exists" });
@@ -29,6 +30,10 @@ router.post("/signup", userCheck,async (req, res) => {
         });
 
         await newUser.save();
+        await Account.create({    // generating a random balance for the user when they sign up between 1 and 10000;
+            userId: newUser._id,
+            balance:1+Math.floor(Math.random() * 10000)
+        });
         const token = jwt.sign(
             { id: newUser._id },
             process.env.JWT_SECRET);
@@ -39,13 +44,14 @@ router.post("/signup", userCheck,async (req, res) => {
     }
 });
 
+
 router.post("/signin", userSigninCheck,async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required" });
     }
     try {
-        const User = await import('../Models/user.model.js').then(module => module.User);
+        const User = await import('../Models/models.js').then(module => module.User);
         const user = await User.findOne({ usernname: username });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -64,13 +70,14 @@ router.post("/signin", userSigninCheck,async (req, res) => {
     }
 });
 
+
 router.put("/update",authMiddleware, userUpdateCheck,async (req, res) => {
     const { username, firstName, lastName, password } = req.body;
     if (!username && !firstName && !lastName && !password) {
         return res.status(400).json({ message: "At least one field is required to update" });
     }
     try {
-        const User = await import('../Models/user.model.js').then(module => module.User);
+        const User = await import('../Models/models.js').then(module => module.User);
         const user = await User.findById(req.userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -87,5 +94,32 @@ router.put("/update",authMiddleware, userUpdateCheck,async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
+
+router.get("/bulk",(req,res)=>{
+    const filter = req.query.filter || "";
+
+    const users = User.find({
+        $or : [{
+            firstName : {
+                $regex : filter
+            },
+            $or : {
+                lastname : {
+                    $regex : filter
+                }
+            }
+        }]
+    })
+
+    res.json({
+        user: users.map(user => ({
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+    })
+})
 
 export default router;
