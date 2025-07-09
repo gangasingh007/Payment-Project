@@ -3,7 +3,6 @@ import { atom, selector } from 'recoil';
 export const authAtom = atom({
     key: 'authAtom',
     default: {
-        user : null,
         token : localStorage.getItem('token') || null,
     }
 })

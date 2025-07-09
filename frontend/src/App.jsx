@@ -4,10 +4,12 @@ import Home from './pages/Home'
 import ProtectedRoutes from './components/ProtectedRoutes'
 import Login from './components/Login'
 import Register from './components/Register'
+import {Toaster} from 'react-hot-toast'
 
 const App = () => {
   return (
     <>
+    <Toaster position='top-right' reverseOrder={false} />
       <Router>
         <Routes>
           <Route path="/" element={
