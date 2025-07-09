@@ -71,7 +71,7 @@ router.post("/signin", userSigninCheck,async (req, res) => {
 });
 
 
-router.put("/update",authMiddleware, userUpdateCheck,async (req, res) => {
+router.put("/update", userUpdateCheck,async (req, res) => {
     const { username, firstName, lastName, password } = req.body;
     if (!username && !firstName && !lastName && !password) {
         return res.status(400).json({ message: "At least one field is required to update" });
@@ -121,5 +121,22 @@ router.get("/bulk",(req,res)=>{
         }))
     })
 })
+
+router.get("/me", authMiddleware, async (req, res) => {
+    try {
+        const account = await Account.findOne({ userId: req.user._id });
+        res.status(200).json({
+            user: {
+                _id: req.user._id,
+                username: req.user.username,
+                firstName: req.user.firstName,
+                lastName: req.user.lastName
+            },
+            account
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 export default router;

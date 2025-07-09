@@ -80,18 +80,76 @@ All endpoints are prefixed with `/api/v1`.
 
 - `POST /api/v1/user/signup`  
   Register a new user.  
-  **Body:** `{ username, password, firstName, lastName }`
+  **Body:**  
+  ```json
+  {
+    "username": "string",
+    "password": "string",
+    "firstName": "string",
+    "lastName": "string"
+  }
+  ```
+  **Returns:** JWT token
 
 - `POST /api/v1/user/signin`  
   Login and receive a JWT token.  
-  **Body:** `{ username, password }`
+  **Body:**  
+  ```json
+  {
+    "username": "string",
+    "password": "string"
+  }
+  ```
+  **Returns:** JWT token
 
 - `PUT /api/v1/user/update`  
   Update user details (requires JWT).  
-  **Body:** `{ username?, password?, firstName?, lastName? }`
+  **Body:**  
+  ```json
+  {
+    "username": "string (optional)",
+    "password": "string (optional)",
+    "firstName": "string (optional)",
+    "lastName": "string (optional)"
+  }
+  ```
+  **Returns:** `{ "message": "User updated successfully" }`
 
 - `GET /api/v1/user/bulk?filter=...`  
-  Search users by name.
+  Search users by name.  
+  **Returns:**  
+  ```json
+  {
+    "user": [
+      {
+        "username": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "_id": "string"
+      }
+    ]
+  }
+  ```
+
+- `GET /api/v1/user/me`  
+  Get current user's profile and account info (requires JWT).  
+  **Returns:**  
+  ```json
+  {
+    "user": {
+      "_id": "string",
+      "username": "string",
+      "firstName": "string",
+      "lastName": "string"
+    },
+    "account": {
+      "_id": "string",
+      "userId": "string",
+      "balance": number,
+      "__v": 0
+    }
+  }
+  ```
 
 ### Account
 
@@ -100,14 +158,21 @@ All endpoints are prefixed with `/api/v1`.
 
 - `POST /api/v1/account/transfer`  
   Transfer money between accounts (requires JWT).  
-  **Body:** `{ fromAccount, toAccount, amount }`
+  **Body:**  
+  ```json
+  {
+    "to": "recipientUserId",
+    "amount": number
+  }
+  ```
+  **Returns:** `{ "message": "Transfer successful" }`
 
-## Notes
+---
 
+**Note:**  
 - All protected routes require an `Authorization: Bearer <token>` header.
 - Passwords are hashed using bcrypt.
 - Input validation is enforced using Zod schemas.
-
 ## License
 
 ISC
