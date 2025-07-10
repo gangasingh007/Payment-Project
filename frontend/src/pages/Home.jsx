@@ -1,43 +1,55 @@
-import React from 'react'
-// import Navbar from '../components/Navbar'
-import Users from '../components/Users'
+import React, { useEffect, useState } from 'react';
+import Users from '../components/Users';
 import axios from 'axios';
 
 const Home = () => {
-  const [loading, setloading] = useState(false)
-    const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const [users, setUsers] = useState([]);
-    const token = localStorage.getItem("token");
 
     useEffect(() => {
-     const fetchUsers = async()=>{
-        setloading(true);
-        try {
-            const res = await axios.get(`http://loaclhost:3000/api/v1/user/bulk?filter=${searchTerm}`,{
-                headers : {
-                    Authorization : `Bearer ${token}`
-                }
-            })
-            const response = res.data.users;
-            setUsers(response);
-        } catch (error) {
-            console.log(error)
-        }finally{
-            setloading(false)
-        }
-     }
-    }, [searchTerm])
-  return (
-    <div className="home-container">
-       <div className="search-input">
-          <input 
-          type="text"
-          onChange={e=>setSearchTerm(e.target.value)}
-          />
-       </div>
-       <Users />
-    </div>
-  )
-}
+        const fetchUsers = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.warn('No token found.');
+                return;
+            }
 
-export default Home
+            setLoading(true);
+            try {
+                const res = await axios.get(`http://localhost:3000/api/v1/user/bulk?filter=${searchTerm}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setUsers(res.data?.users || []);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, [searchTerm]);
+
+    return (
+        <div className='home-container'>
+            <div className='search-input'>
+                <input
+                    type='text'
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder='Search'
+                />
+            </div>
+
+            {loading ? <p>Loading...</p> : null}
+
+            {users.map((user) => (
+                <Users user={user} key={user._id} />
+            ))}
+        </div>
+    );
+};
+
+export default Home;

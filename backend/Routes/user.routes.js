@@ -39,7 +39,7 @@ router.post("/signup",userCheck,async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '2d' }
         );
-        res.status(201).json(token,{ message: "User created successfully" });
+        res.status(201).json(token);  // Remove the { message: ... } part
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -67,7 +67,7 @@ router.post("/signin",userSigninCheck,async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '2d' }
         );
-        res.status(201).json(token,{ message: "User created successfully" });
+        res.status(200).json(token);  // Remove the { message: ... } part
     } catch (error) {
         console.error("Error signing in:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -100,7 +100,7 @@ router.put("/update",userUpdateCheck,async (req, res) => {
 });
 
 
-router.get('/bulk', authMiddleware, async (req, res) => {
+router.get('/bulk', async (req, res) => {
   try {
     const filter = req.query.filter || '';
     
@@ -127,7 +127,8 @@ router.get('/bulk', authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/me", authMiddleware, async (req, res) => {
+router.get("/me",authMiddleware, async (req, res) => {
+
     try {
         const account = await Account.findOne({ userId: req.user._id });
         res.status(200).json({
