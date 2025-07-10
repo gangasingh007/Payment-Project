@@ -127,7 +127,6 @@ router.get('/bulk', authMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
 router.get("/me", authMiddleware, async (req, res) => {
     try {
         const account = await Account.findOne({ userId: req.user._id });

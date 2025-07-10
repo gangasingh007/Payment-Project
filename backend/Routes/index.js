@@ -6,6 +6,6 @@ import accountRoutes from './account.routes.js';
 const router = express.Router();
 
 router.use("/user", userRoutes)
-router.use("/account", authMiddleware, accountRoutes);
+router.use("/account", accountRoutes);
 
 export default router;

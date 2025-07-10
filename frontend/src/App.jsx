@@ -6,12 +6,15 @@ import Login from './components/Login'
 import Register from './components/Register'
 import {Toaster} from 'react-hot-toast'
 import Profile from './pages/Profile'
+import Navbar from './components/Navbar'
+import Transfer from './components/Transfer'
 
 const App = () => {
   return (
     <>
     <Toaster position='top-right' reverseOrder={false} />
       <Router>
+        <Navbar></Navbar>
         <Routes>
           <Route path="/" element={
             <ProtectedRoutes>
@@ -21,6 +24,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/transfer" element={<Transfer />} />
         </Routes>
       </Router>
     </>
