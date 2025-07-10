@@ -36,7 +36,9 @@ router.post("/signup",userCheck,async (req, res) => {
         });
         const token = jwt.sign(
             { id: newUser._id },
-            process.env.JWT_SECRET);
+            process.env.JWT_SECRET,
+            { expiresIn: '2d' }
+        );
         res.status(201).json(token,{ message: "User created successfully" });
     } catch (error) {
         console.error("Error creating user:", error);
@@ -45,7 +47,7 @@ router.post("/signup",userCheck,async (req, res) => {
 });
 
 
-router.post("/signin",async (req, res) => {
+router.post("/signin",userSigninCheck,async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required" });
@@ -62,8 +64,10 @@ router.post("/signin",async (req, res) => {
         }
         const token = jwt.sign(
             { id: user._id },
-            process.env.JWT_SECRET);
-            res.status(201).json(token,{ message: "User created successfully" });
+            process.env.JWT_SECRET,
+            { expiresIn: '2d' }
+        );
+        res.status(201).json(token,{ message: "User created successfully" });
     } catch (error) {
         console.error("Error signing in:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -71,7 +75,7 @@ router.post("/signin",async (req, res) => {
 });
 
 
-router.put("/update",async (req, res) => {
+router.put("/update",userUpdateCheck,async (req, res) => {
     const { username, firstName, lastName, password } = req.body;
     if (!username && !firstName && !lastName && !password) {
         return res.status(400).json({ message: "At least one field is required to update" });
@@ -96,32 +100,34 @@ router.put("/update",async (req, res) => {
 });
 
 
-router.get("/bulk",(req,res)=>{
-    const filter = req.query.filter || "";
+router.get('/bulk', authMiddleware, async (req, res) => {
+  try {
+    const filter = req.query.filter || '';
+    
+    // Case-insensitive search on firstName or lastName
+    const users = await User.find({
+      $or: [
+        { firstName: { $regex: filter, $options: 'i' } },
+        { lastName: { $regex: filter, $options: 'i' } }
+      ]
+    });
 
-    const users = User.find({
-        $or : [{
-            firstName : {
-                $regex : filter
-            },
-            $or : {
-                lastname : {
-                    $regex : filter
-                }
-            }
-        }]
-    })
-
+    // Map users to desired response format
     res.json({
-        user: users.map(user => ({
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            _id: user._id
-        }))
-    })
-})
+      users: users.map(user => ({
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        _id: user._id
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
+module.exports = router;
 router.get("/me", authMiddleware, async (req, res) => {
     try {
         const account = await Account.findOne({ userId: req.user._id });
