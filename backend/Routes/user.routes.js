@@ -75,7 +75,7 @@ router.post("/signin",userSigninCheck,async (req, res) => {
 });
 
 
-router.put("/update",userUpdateCheck,async (req, res) => {
+router.put("/update",authMiddleware,userUpdateCheck,async (req, res) => {
     const { username, firstName, lastName, password } = req.body;
     if (!username && !firstName && !lastName && !password) {
         return res.status(400).json({ message: "At least one field is required to update" });
@@ -100,7 +100,7 @@ router.put("/update",userUpdateCheck,async (req, res) => {
 });
 
 
-router.get('/bulk', async (req, res) => {
+router.get('/bulk',authMiddleware, async (req, res) => {
   try {
     const filter = req.query.filter || '';
     
